@@ -1,0 +1,7 @@
+{
+    "ignore": [
+        "mspc/mpv.py",
+    ],
+    "stubPath": "typestubs",
+    "reportImportCycles": false
+}
