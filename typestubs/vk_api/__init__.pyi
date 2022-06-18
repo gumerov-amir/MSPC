@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 import requests
 
-from . import exceptions
+
 
 class Audio:
     def get(
@@ -11,20 +11,25 @@ class Audio:
         album_id: int = ...,
         count: int = ...,
     ) -> Dict[str, Any]: ...
+
     def search(
-        self, q: str = "", count: int = ..., sort: int = ...
+        self, q: str = ..., count: int = ..., sort: int = ...
     ) -> Dict[str, Any]: ...
+
 
 class Account:
     def getInfo(self) -> Dict[str, Any]: ...
 
+
 class Utils:
-    def resolveScreenName(self, screen_name: str = "") -> Dict[str, Any]: ...
+    def resolveScreenName(self, screen_name: str = ...) -> Dict[str, Any]: ...
+
 
 class Api:
     account: Account
     audio: Audio
     utils: Utils
+
 
 class VkApi:
     def __init__(
@@ -33,4 +38,5 @@ class VkApi:
         session: requests.Session = ...,
         api_version: str = ...,
     ) -> None: ...
+
     def get_api(self) -> Api: ...

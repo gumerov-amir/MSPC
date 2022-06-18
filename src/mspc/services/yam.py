@@ -4,8 +4,9 @@ from logging import Logger
 from typing import Any, List, TYPE_CHECKING
 from urllib.parse import urlparse
 
-from yandex_music import Client, Track as YamTrack
+from yandex_music import Client
 from yandex_music.exceptions import UnauthorizedError
+from yandex_music.track.track import Track as YamTrack
 
 from .service import Service
 from .. import errors
@@ -47,9 +48,10 @@ class YamService(Service):
             self.api.init()
         except UnauthorizedError as e:
             raise errors.ServiceError(e)
-        if not self.api.account_status().account.uid:
+        acc_status = self.api.account_status()
+        if acc_status is None or not acc_status.account.uid:
             self.warning_message = self.translator.translate("Token is not provided")
-        elif not self.api.account_status().plus["has_plus"]:
+        elif acc_status.plus is None or not acc_status.plus.has_plus:
             self.warning_message = self.translator.translate(
                 "You don't have Yandex Plus"
             )
@@ -83,8 +85,10 @@ class YamService(Service):
             playlist = self.api.users_playlists(kind=kind, user_id=user_id)
             if playlist is None:
                 raise errors.ServiceError()
-            for track in playlist.tracks:
-                track: YamTrack = track.fetch_track()
+            elif isinstance(playlist, list):
+                playlist = playlist[0]  # it is temperary solution
+            for track_short in playlist.tracks:
+                track = track_short.fetch_track()
                 yam_tracks.append(track)
         else:
             raise errors.ServiceError(
@@ -98,7 +102,9 @@ class YamService(Service):
                     artists=[
                         Artist(str(artist.name), str(artist.id), self)
                         for artist in yam_track.artists
-                    ],
+                    ]
+                    if yam_track.artists
+                    else [],
                     extra_info={"track_id": yam_track.track_id},
                     service=self,
                     type=TrackType.Dynamic,
@@ -107,7 +113,10 @@ class YamService(Service):
         return tracks
 
     def prepare_track(self, track: Track) -> Track:
-        yam_track = self.api.tracks(track.extra_info["track_id"])[0]
+        yam_tracks = self.api.tracks(track.extra_info["track_id"])
+        if yam_tracks is None:
+            raise errors.ServiceError()
+        yam_track = yam_tracks[0]
         return Track(
             title=track.title,
             artists=track.artists,
@@ -151,6 +160,8 @@ class YamService(Service):
             if found_podcast_episodes.podcast_episodes is None:
                 raise errors.NothingFoundError
             yam_tracks = found_podcast_episodes.podcast_episodes.results
+        else:
+            raise NotImplementedError
         tracks: List[Track] = []
         yam_track: YamTrack
         for yam_track in yam_tracks:
@@ -158,9 +169,9 @@ class YamService(Service):
                 Track(
                     title=str(yam_track.title),
                     artists=[
-                        Artist(artist.name, artist.id, self)
+                        Artist(str(artist.name), artist.id, self)
                         for artist in yam_track.artists
-                    ],
+                    ] if yam_track.artists else [],
                     extra_info={"track_id": yam_track.track_id},
                     service=self,
                     type=TrackType.Dynamic,

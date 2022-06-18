@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 
-import bs4
-import patoolib
-import requests
-
 import os
 import platform
 import re
 import shutil
 import sys
 
-path = os.path.dirname(os.path.realpath(__file__))
-path = os.path.dirname(path)
-sys.path.append(path)
+if not sys.platform == "win32":
+    raise NotImplementedError("This tool is only for windows")
 
-from mspc import downloader
+import bs4
+
+import patoolib
+
+import requests
+
+from .. import downloader
 
 
 url = "https://sourceforge.net/projects/mpv-player-windows/files/libmpv/"
 
-cd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+cd = os.getcwd()
 
 
-def download():
+def download() -> None:
     r = requests.get(url)
     page = bs4.BeautifulSoup(r.text, features="html.parser")
     table = page.table
@@ -35,7 +36,7 @@ def download():
     downloader.download_file(download_url, os.path.join(cd, "libmpv.7z"))
 
 
-def extract():
+def extract() -> None:
     try:
         os.mkdir(os.path.join(cd, "libmpv"))
     except FileExistsError:
@@ -47,7 +48,7 @@ def extract():
     )
 
 
-def move():
+def move() -> None:
     try:
         os.rename(
             os.path.join(cd, "libmpv", "mpv-2.dll"),
@@ -61,26 +62,17 @@ def move():
         )
 
 
-def clean():
+def clean() -> None:
     os.remove(os.path.join(cd, "libmpv.7z"))
     shutil.rmtree(os.path.join(cd, "libmpv"))
 
 
-def install():
-    if sys.platform != "win32":
-        sys.exit("This script should be run only on Windows")
-    print("Installing libmpv for Windows")
-    print("Downloading latest libmpv version")
+def main() -> None:
     download()
-    print("Downloaded. extracting")
     extract()
-    print("Extracted. moving")
     move()
-    print("moved. cleaning")
     clean()
-    print("cleaned.")
-    print("Installed")
 
 
 if __name__ == "__main__":
-    install()
+    main()

@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class PlayerModel(BaseModel):
-    language: str = "en"
     default_volume: int = 50
     max_volume: int = 100
     volume_fading: bool = True
@@ -41,7 +40,6 @@ class TranslatorModel(BaseModel):
 
 
 class ConfigModel(BaseModel):
-    language: str = "en"
     player: PlayerModel = PlayerModel()
     services: ServicesModel = ServicesModel()
     translator: TranslatorModel = TranslatorModel()

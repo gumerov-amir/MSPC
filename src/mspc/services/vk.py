@@ -9,6 +9,7 @@ from .. import mpv
 import requests
 
 import vk_api
+from vk_api.exceptions import ApiError, ApiHttpError
 
 from .service import SearchOptions, SearchType, Service
 from .. import errors
@@ -70,8 +71,8 @@ class VkService(Service):
         try:
             self.api.account.getInfo()
         except (
-            vk_api.exceptions.ApiHttpError,
-            vk_api.exceptions.ApiError,
+            ApiError,
+            ApiHttpError,
             requests.exceptions.ConnectionError,
         ) as e:
             self.logger.error(e)

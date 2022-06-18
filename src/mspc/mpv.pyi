@@ -54,6 +54,7 @@ class MPV:
     ) -> Callable[[Callable[[MpvEvent], None]], None]: ...
     media_title: str
     metadata: Dict[str, Any]
+    def observe_property(self, name: str, handler: Callable[[str, Any], None]) -> None: ...
     pause: bool
     record_file: str
 

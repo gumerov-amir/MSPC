@@ -1,6 +1,7 @@
 {
     "ignore": [
-        "mspc/mpv.py",
+        "src/mspc/mpv.py",
+        "src/mspc/tools/libmpv_win_downloader.py"
     ],
     "stubPath": "typestubs",
     "reportImportCycles": false

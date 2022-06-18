@@ -4,13 +4,13 @@ import html
 import random
 import time
 from logging import Logger
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
-
-from .. import mpv
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 from .enums import Mode, State
 from .sound_device import SoundDevice, SoundDeviceType
 from .. import errors
+from .. import mpv
+from ..structs.artist import Artist
 from ..structs.track import Track, TrackType
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class Player:
         self._mode = Mode.TRACK_LIST
         self._volume = self.config.default_volume
 
-    def _parse_metadata(self, metadata: Dict[str, Any]) -> str:
+    def _parse_metadata(self, metadata: Dict[str, Any]) -> Tuple[Optional[str], ...]:
         stream_names = ["icy-name"]
         stream_name = None
         title = None
@@ -56,11 +56,7 @@ class Player:
                 title = html.unescape(metadata[i])
             if "artist" in i:
                 artist = html.unescape(metadata[i])
-        chunks: List[str] = []
-        chunks.append(artist) if artist else ...
-        chunks.append(title) if title else ...
-        chunks.append(stream_name) if stream_name else ...
-        return " - ".join(chunks)
+        return title, artist, stream_name
 
     def _play(self, arg: str) -> None:
         self._player.pause = False
@@ -161,13 +157,19 @@ class Player:
         ):
             metadata = self._player.metadata
             try:
-                new_name = self._parse_metadata(metadata)
-                if not new_name:
-                    new_name = html.unescape(self._player.media_title)
+                title, artist_name, stream_name = self._parse_metadata(metadata)
+                if not title:
+                    title = html.unescape(self._player.media_title)
             except TypeError:
-                new_name = html.unescape(self._player.media_title)
-            if self.track.name != new_name and new_name:
-                self.track.name = new_name
+                title = html.unescape(self._player.media_title)
+                artist_name = None
+                stream_name = None
+            if title and self.track.title != title:
+                self.track.title = title
+            if artist_name is not None:
+                self.track.artists = [Artist(artist_name)]
+            if stream_name is not None:
+                self.track.stream_name = stream_name
 
     def toggle_pause(self) -> None:
         if not self._player.pause:

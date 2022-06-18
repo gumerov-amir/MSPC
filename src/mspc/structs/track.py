@@ -20,6 +20,7 @@ class TrackType(Enum):
 
 class Track:
     format: str
+    stream_name: str
     type: TrackType
 
     def __init__(
@@ -28,7 +29,7 @@ class Track:
         artists: List[Artist] = [],
         url: str = "",
         service: Optional[Service] = None,
-        extra_info: Optional[Dict[str, Any]] = None,
+        extra_info: Dict[str, Any] = {},
         format: str = "",
         type: TrackType = TrackType.Default,
     ) -> None:
