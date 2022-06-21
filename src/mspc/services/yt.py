@@ -76,7 +76,7 @@ class YtService(Service):
                 raise errors.ServiceError()
             title = str(stream["title"])
             if "uploader" in stream:
-                artists = [Artist(str(stream["uploader"]))]
+                artists = [Artist(str(stream["uploader"]["name"]))]
             else:
                 artists = []
             format = str(stream["ext"])
