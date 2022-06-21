@@ -11,11 +11,11 @@ if not sys.platform == "win32":
 
 import bs4
 
+import mspc_downloader
+
 import patoolib
 
 import requests
-
-from mspc import downloader
 
 
 url = "https://sourceforge.net/projects/mpv-player-windows/files/libmpv/"
@@ -33,7 +33,7 @@ def download() -> None:
         )
     else:
         download_url = table.find("a", href=True, title=re.compile("i686")).get("href")
-    downloader.download_file(download_url, os.path.join(cd, "libmpv.7z"))
+    mspc_downloader.download_file(download_url, os.path.join(cd, "libmpv.7z"))
 
 
 def extract() -> None:
