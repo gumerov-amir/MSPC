@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum, Flag
 from typing import Any, List, TYPE_CHECKING
 
-import mspc_downloader
+from mspc_tools import downloader
 
 if TYPE_CHECKING:
     from ..structs.playlist import Playlist
@@ -30,7 +30,7 @@ class Service(metaclass=ABCMeta):
         pass
 
     def download(self, track: Track, file_path: str) -> None:
-        mspc_downloader.download_file(track.url, file_path)
+        downloader.download_file(track.url, file_path)
 
     def get_my_playlists(self) -> List[Playlist]:
         raise NotImplementedError

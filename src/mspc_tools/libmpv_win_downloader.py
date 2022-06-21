@@ -11,7 +11,7 @@ if not sys.platform == "win32":
 
 import bs4
 
-import mspc_downloader
+from . import downloader
 
 import patoolib
 
@@ -33,7 +33,7 @@ def download() -> None:
         )
     else:
         download_url = table.find("a", href=True, title=re.compile("i686")).get("href")
-    mspc_downloader.download_file(download_url, os.path.join(cd, "libmpv.7z"))
+    downloader.download_file(download_url, os.path.join(cd, "libmpv.7z"))
 
 
 def extract() -> None:
