@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 from logging import Logger
-from typing import Dict, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING
 
 from .vk import VkService
 from .yam import YamService
@@ -11,24 +11,21 @@ from ..config import ServicesModel
 
 if TYPE_CHECKING:
     from .service import Service
-    from ..translator import Translator
 
 
 class ServiceManager:
-    def __init__(
-        self, config: ServicesModel, logger: Logger, translator: Translator
-    ) -> None:
+    def __init__(self, config: ServicesModel, logger: Logger) -> None:
         self.config = config
         self.logger = logger
-        self.translator = translator
         self.fallback_service = vars.fallback_service
         self.services: Dict[str, Service]
         self.services = {
-            "vk": VkService(self.config.vk, self.logger, self.translator),
-            "yam": YamService(self.config.yam, self.logger, self.translator),
-            "yt": YtService(self.config.yt, self.logger, self.translator),
+            "vk": VkService(self.config.vk, self.logger),
+            "yam": YamService(self.config.yam, self.logger),
+            "yt": YtService(self.config.yt, self.logger),
         }
         self.service: Service = self.services[self.config.default_service]
+        self.failed_services: List[Service] = []
 
     def close(self) -> None:
         self.logger.debug("Closing services")
@@ -43,9 +40,8 @@ class ServiceManager:
                 continue
             try:
                 service.initialize()
-            except errors.ServiceError as e:
-                service.is_enabled = False
-                service.error_message = str(e)
+            except errors.ServiceError:
+                self.failed_services.append(service)
                 if service == self.service:
                     self.service = self.services[self.fallback_service]
         self.logger.debug("Services have been initialized")

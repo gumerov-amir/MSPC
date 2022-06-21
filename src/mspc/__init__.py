@@ -7,7 +7,6 @@ from .player import Player
 from .services import ServiceManager
 from .services.service import Service
 from .structs.track import Track
-from .translator import Translator
 from .url_handler import UrlHandler
 
 
@@ -15,10 +14,9 @@ class MSPC:
     def __init__(self, config: Dict[str, Any] = {}, logger: Logger = root):
         self.config = ConfigModel(**config)
         self.logger = logger
-        self.translator = Translator(self.config.translator)
-        self.player = Player(self.config.player, self.logger, self.translator)
+        self.player = Player(self.config.player, self.logger)
         self.service_manager = ServiceManager(
-            self.config.services, self.logger, self.translator
+            self.config.services, self.logger
         )
         self.url_handler = UrlHandler(self.service_manager)
 

@@ -1,4 +1,16 @@
-class ServiceNotFoundError(Exception):
+class VKAuthorizationNeededError(Exception):
+    pass
+
+
+class YamNoAuthorizationWarning(Warning):
+    pass
+
+
+class YamAuthorizationError(Exception):
+    pass
+
+
+class YamNoSubscriptionWarning(Warning):
     pass
 
 

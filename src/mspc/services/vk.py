@@ -18,7 +18,6 @@ from ..structs.track import Track
 
 if TYPE_CHECKING:
     from ..config import VkModel
-    from ..translator import Translator
 
 
 class VkService(Service):
@@ -33,10 +32,9 @@ class VkService(Service):
     ]
     format = "mp3"
 
-    def __init__(self, config: VkModel, logger: Logger, translator: Translator):
+    def __init__(self, config: VkModel, logger: Logger):
         self.config = config
         self.logger = logger
-        self.translator = translator
         self.is_enabled = config.is_enabled
 
     def download(self, track: Track, file_path: str) -> None:
@@ -70,13 +68,19 @@ class VkService(Service):
         self.api = self._session.get_api()
         try:
             self.api.account.getInfo()
+        except ApiError as e:
+            if e.code == 5:
+                self.ext = errors.VKAuthorizationNeededError()
+                self.is_enabled = False
+                raise errors.ServiceError
         except (
-            ApiError,
             ApiHttpError,
             requests.exceptions.ConnectionError,
         ) as e:
             self.logger.error(e)
-            raise errors.ServiceError(e)
+            self.ext = e
+            self.is_enabled = False
+            raise errors.ServiceError
         self.logger.debug("VK service has been initialized")
 
     def get_tracks(self, url: str, **kwargs: Any) -> List[Track]:

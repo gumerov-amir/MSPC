@@ -15,7 +15,6 @@ from ..structs.track import Track, TrackType
 
 if TYPE_CHECKING:
     from ..config import YamModel
-    from ..translator import Translator
 
 
 class YamSearchType(Enum):
@@ -35,10 +34,9 @@ class YamService(Service):
     hostnames = ["music.yandex.ru"]
     format = ".mp3"
 
-    def __init__(self, config: YamModel, logger: Logger, translator: Translator):
+    def __init__(self, config: YamModel, logger: Logger):
         self.config = config
         self.logger = logger
-        self.translator = translator
         self.is_enabled = self.config.is_enabled
 
     def initialize(self) -> None:
@@ -46,15 +44,17 @@ class YamService(Service):
         self.api = Client(token=self.config.token)  # type: ignore
         try:
             self.api.init()
-        except UnauthorizedError as e:
-            raise errors.ServiceError(e)
+        except UnauthorizedError:
+            self.ext = errors.YamAuthorizationError()
+            self.is_enabled = False
+            raise errors.ServiceError
         acc_status = self.api.account_status()
         if acc_status is None or not acc_status.account.uid:
-            self.warning_message = self.translator.translate("Token is not provided")
+            self.ext = errors.YamNoAuthorizationWarning()
+            raise errors.ServiceError
         elif acc_status.plus is None or not acc_status.plus.has_plus:
-            self.warning_message = self.translator.translate(
-                "You don't have Yandex Plus"
-            )
+            self.ext = errors.YamNoSubscriptionWarning()
+            raise errors.ServiceError
         self.logger.debug("Yandex-music service has been initialized")
 
     def get_tracks(self, url: str, **kwargs: Any) -> List[Track]:
@@ -91,9 +91,7 @@ class YamService(Service):
                 track = track_short.fetch_track()
                 yam_tracks.append(track)
         else:
-            raise errors.ServiceError(
-                self.translator.translate("This link is not supported")
-            )
+            raise errors.ServiceError
         tracks: List[Track] = []
         for yam_track in yam_tracks:
             tracks.append(
@@ -171,7 +169,9 @@ class YamService(Service):
                     artists=[
                         Artist(str(artist.name), artist.id, self)
                         for artist in yam_track.artists
-                    ] if yam_track.artists else [],
+                    ]
+                    if yam_track.artists
+                    else [],
                     extra_info={"track_id": yam_track.track_id},
                     service=self,
                     type=TrackType.Dynamic,

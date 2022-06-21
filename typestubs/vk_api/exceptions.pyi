@@ -1,6 +1,5 @@
 class ApiHttpError(Exception):
     pass
 
-
 class ApiError(Exception):
-    pass
+    code: int

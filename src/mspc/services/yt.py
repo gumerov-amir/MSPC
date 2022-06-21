@@ -14,16 +14,14 @@ from ..structs.track import Track, TrackType
 
 if TYPE_CHECKING:
     from ..config import YtModel
-    from ..translator import Translator
 
 
 class YtService(Service):
     name = "yt"
 
-    def __init__(self, config: YtModel, logger: Logger, translator: Translator):
+    def __init__(self, config: YtModel, logger: Logger):
         self.config = config
         self.logger = logger
-        self.translator = translator
         self.is_enabled = self.config.is_enabled
 
     def initialize(self) -> None:

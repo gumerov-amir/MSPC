@@ -15,7 +15,6 @@ from ..structs.track import Track, TrackType
 
 if TYPE_CHECKING:
     from ..config import PlayerModel
-    from ..translator import Translator
 
 
 class Player:
@@ -27,7 +26,7 @@ class Player:
         "ytdl": False,
     }
 
-    def __init__(self, config: PlayerModel, logger: Logger, translator: Translator):
+    def __init__(self, config: PlayerModel, logger: Logger):
         self.config = config
         self.logger = logger
         self.mpv_options.update(self.config.player_options)

@@ -24,8 +24,7 @@ class Service(metaclass=ABCMeta):
     is_extended: bool = False
     is_hidden: bool = False
     hostnames: List[str] = []
-    error_message: str = ""
-    warning_message: str = ""
+    ext: Exception
 
     def close(self) -> None:
         pass

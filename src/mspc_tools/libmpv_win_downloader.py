@@ -15,7 +15,7 @@ import patoolib
 
 import requests
 
-from .. import downloader
+from mspc import downloader
 
 
 url = "https://sourceforge.net/projects/mpv-player-windows/files/libmpv/"
