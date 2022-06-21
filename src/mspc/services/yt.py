@@ -76,7 +76,7 @@ class YtService(Service):
                 raise errors.ServiceError()
             title = str(stream["title"])
             if "uploader" in stream:
-                artists = [Artist(str(stream["uploader"]["name"]))]
+                artists = [Artist(str(stream["uploader"]))]
             else:
                 artists = []
             format = str(stream["ext"])
@@ -98,7 +98,7 @@ class YtService(Service):
         if search["result"]:
             tracks: List[Track] = []
             for video in search["result"]:
-                track = Track(title=video["title"], artists=[Artist(video["channel"])], url=video["link"], service=self, type=TrackType.Dynamic)
+                track = Track(title=video["title"], artists=[Artist(video["channel"]["name"])], url=video["link"], service=self, type=TrackType.Dynamic)
                 tracks.append(track)
             return tracks
         else:
